@@ -1,4 +1,4 @@
-// GenieTWPRepository.java - New
+// GenieTWPRepository.java - CORRECTED
 package org.upov.genie.repositories;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -12,8 +12,9 @@ import java.util.List;
 @Repository
 public interface GenieTWPRepository extends JpaRepository<GenieTWP, Long> {
     
+    // FIXED: Use gt.genieId instead of gt.genieSpecies.genieId
     @Query("SELECT gt FROM GenieTWP gt " +
            "LEFT JOIN FETCH gt.twp " +
-           "WHERE gt.genieSpecies.genieId = :genieId")
+           "WHERE gt.genieId = :genieId")
     List<GenieTWP> findByGenieIdWithTWP(@Param("genieId") Long genieId);
 }

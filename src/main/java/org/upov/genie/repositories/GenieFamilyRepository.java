@@ -1,4 +1,4 @@
-// GenieFamilyRepository.java
+// GenieFamilyRepository.java - CORRECTED
 package org.upov.genie.repositories;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -12,6 +12,7 @@ import java.util.List;
 @Repository
 public interface GenieFamilyRepository extends JpaRepository<GenieFamily, Long> {
     
+    // FIXED: Use gf.genieId instead of gf.genieSpecies.genieId
     @Query("SELECT gf FROM GenieFamily gf " +
            "LEFT JOIN FETCH gf.family " +
            "WHERE gf.genieId = :genieId")
