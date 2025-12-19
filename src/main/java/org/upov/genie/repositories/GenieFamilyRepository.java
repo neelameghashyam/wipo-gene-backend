@@ -1,4 +1,4 @@
-// GenieFamilyRepository.java - New
+// GenieFamilyRepository.java
 package org.upov.genie.repositories;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -14,6 +14,6 @@ public interface GenieFamilyRepository extends JpaRepository<GenieFamily, Long> 
     
     @Query("SELECT gf FROM GenieFamily gf " +
            "LEFT JOIN FETCH gf.family " +
-           "WHERE gf.genieSpecies.genieId = :genieId")
+           "WHERE gf.genieId = :genieId")
     List<GenieFamily> findByGenieIdWithFamily(@Param("genieId") Long genieId);
 }

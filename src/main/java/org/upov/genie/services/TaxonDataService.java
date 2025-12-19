@@ -1,4 +1,4 @@
-// TaxonDataService.java - Complete version with all methods
+// TaxonDataService.java - Fixed with separate queries
 package org.upov.genie.services;
 
 import lombok.RequiredArgsConstructor;
@@ -33,13 +33,10 @@ public class TaxonDataService {
     private final GenieTWPRepository genieTWPRepository;
     private final TaxonResponseMapper taxonMapper;
 
-    /**
-     * Get detailed information for a specific species
-     */
     public TaxonDetailsResponse getSpeciesDetails(Long genieId, String lang) {
         log.debug("Fetching details for species ID: {} in language: {}", genieId, lang);
 
-        GenieSpecies genie = genieSpeciesRepository.findByIdWithAllDetails(genieId)
+        GenieSpecies genie = genieSpeciesRepository.findById(genieId)
             .orElseThrow(() -> new GenieApiException("Species not found with ID: " + genieId));
 
         List<GenieSpeciesName> names = genieSpeciesNameRepository.findByGenieIdOrdered(genieId);
@@ -47,15 +44,14 @@ public class TaxonDataService {
         List<SpeciesExperience> experiences = experienceRepository.findByGenieIdWithDetails(genieId);
         List<SpeciesOffering> offerings = offeringRepository.findByGenieIdForCooperation(genieId);
         List<SpeciesUtilization> utilizations = utilizationRepository.findByGenieIdForCooperation(genieId);
+        List<GenieFamily> families = genieFamilyRepository.findByGenieIdWithFamily(genieId);
+        List<GenieTWP> twps = genieTWPRepository.findByGenieIdWithTWP(genieId);
 
         return taxonMapper.toDetailsResponse(
-            genie, names, protections, experiences, offerings, utilizations, lang
+            genie, names, protections, experiences, offerings, utilizations, families, twps, lang
         );
     }
 
-    /**
-     * Get all active species with pagination, ordered by update date (most recent first)
-     */
     public TaxonSearchEnhancedResponse getAllSpecies(int page, int pageSize) {
         log.debug("Fetching all active species - page: {}, size: {}", page, pageSize);
 
@@ -63,7 +59,11 @@ public class TaxonDataService {
         Page<GenieSpecies> speciesPage = genieSpeciesRepository.findAllActiveOrderedByDate(pageable);
 
         List<TaxonListItemEnhanced> speciesList = speciesPage.getContent().stream()
-            .map(taxonMapper::toListItemEnhanced)
+            .map(genie -> {
+                List<GenieFamily> families = genieFamilyRepository.findByGenieIdWithFamily(genie.getGenieId());
+                List<GenieTWP> twps = genieTWPRepository.findByGenieIdWithTWP(genie.getGenieId());
+                return taxonMapper.toListItemEnhanced(genie, families, twps);
+            })
             .collect(Collectors.toList());
 
         return TaxonSearchEnhancedResponse.builder()
@@ -74,9 +74,6 @@ public class TaxonDataService {
             .build();
     }
 
-    /**
-     * Search species by name or code with pagination
-     */
     public List<TaxonListItemEnhanced> searchSpecies(String searchTerm, int page, int pageSize) {
         log.debug("Searching species with term: {}, page: {}, size: {}", searchTerm, page, pageSize);
 
@@ -90,17 +87,17 @@ public class TaxonDataService {
         );
 
         return results.getContent().stream()
-            .map(taxonMapper::toListItemEnhanced)
+            .map(genie -> {
+                List<GenieFamily> families = genieFamilyRepository.findByGenieIdWithFamily(genie.getGenieId());
+                List<GenieTWP> twps = genieTWPRepository.findByGenieIdWithTWP(genie.getGenieId());
+                return taxonMapper.toListItemEnhanced(genie, families, twps);
+            })
             .collect(Collectors.toList());
     }
 
-    /**
-     * Generate protection report for all species
-     */
     public List<ProtectionReportResponse> getProtectionReport() {
         log.debug("Generating protection report");
         
-        // Get all active species
         List<GenieSpecies> allSpecies = genieSpeciesRepository.findAll().stream()
             .filter(g -> "Y".equals(g.getCodeActive()))
             .collect(Collectors.toList());
@@ -118,13 +115,9 @@ public class TaxonDataService {
             .collect(Collectors.toList());
     }
 
-    /**
-     * Generate cooperation report for species with experience
-     */
     public List<CooperationReportResponse> getCooperationReport(boolean includeDerived) {
         log.debug("Generating cooperation report, includeDerived: {}", includeDerived);
         
-        // Get species with practical experience
         List<GenieSpecies> speciesWithExperience = 
             experienceRepository.findSpeciesWithExperience();
 

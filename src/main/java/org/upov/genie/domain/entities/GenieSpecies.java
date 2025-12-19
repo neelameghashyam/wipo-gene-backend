@@ -1,4 +1,4 @@
-// GenieSpecies.java - Add missing relationships
+// GenieSpecies.java - Simplified version
 package org.upov.genie.domain.entities;
 
 import jakarta.persistence.*;
@@ -99,11 +99,4 @@ public class GenieSpecies {
 
     @OneToMany(mappedBy = "genieSpecies", fetch = FetchType.LAZY)
     private List<SpeciesUtilization> utilizations;
-
-    // New relationships for family and TWP
-    @OneToMany(mappedBy = "genieSpecies", fetch = FetchType.LAZY)
-    private List<GenieFamily> genieFamilies;
-
-    @OneToMany(mappedBy = "genieSpecies", fetch = FetchType.LAZY)
-    private List<GenieTWP> genieTWPs;
 }
