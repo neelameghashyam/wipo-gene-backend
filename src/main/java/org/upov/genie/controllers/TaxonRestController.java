@@ -1,3 +1,4 @@
+// TaxonRestController.java - Updated
 package org.upov.genie.controllers;
 
 import lombok.RequiredArgsConstructor;
@@ -15,9 +16,9 @@ import java.util.List;
 @RequiredArgsConstructor
 @CrossOrigin(origins = "*")
 public class TaxonRestController {
-    
+
     private final TaxonDataService taxonDataService;
-    
+
     @GetMapping("/{id}")
     public ResponseEntity<TaxonDetailsResponse> getSpeciesDetails(
         @PathVariable Long id,
@@ -27,38 +28,42 @@ public class TaxonRestController {
         TaxonDetailsResponse details = taxonDataService.getSpeciesDetails(id, lang);
         return ResponseEntity.ok(details);
     }
-    
+
     @GetMapping
-    public ResponseEntity<TaxonSearchResponse> getAllSpecies(
+    public ResponseEntity<TaxonSearchEnhancedResponse> getAllSpecies(
         @RequestParam(defaultValue = "0") int page,
-        @RequestParam(defaultValue = "50") int size
+        @RequestParam(defaultValue = "20") int size
     ) {
         log.info("GET /api/v1/species - page: {}, size: {}", page, size);
-        TaxonSearchResponse response = taxonDataService.getAllSpecies(page, size);
+        TaxonSearchEnhancedResponse response = taxonDataService.getAllSpecies(page, size);
         return ResponseEntity.ok(response);
     }
-    
+
     @GetMapping("/search")
-    public ResponseEntity<List<TaxonListItem>> searchSpecies(@RequestParam String q) {
-        log.info("GET /api/v1/species/search?q={}", q);
-        List<TaxonListItem> results = taxonDataService.searchSpecies(q);
+    public ResponseEntity<List<TaxonListItemEnhanced>> searchSpecies(
+        @RequestParam String q,
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "20") int size
+    ) {
+        log.info("GET /api/v1/species/search?q={}, page={}, size={}", q, page, size);
+        List<TaxonListItemEnhanced> results = taxonDataService.searchSpecies(q, page, size);
         return ResponseEntity.ok(results);
     }
-    
+
     @GetMapping("/{id}/names")
     public ResponseEntity<TaxonNamesInfo> getSpeciesNames(@PathVariable Long id) {
         log.info("GET /api/v1/species/{}/names", id);
         TaxonDetailsResponse details = taxonDataService.getSpeciesDetails(id, "en");
         return ResponseEntity.ok(details.getNames());
     }
-    
+
     @GetMapping("/{id}/protection")
     public ResponseEntity<List<AuthorityProtectionInfo>> getSpeciesProtection(@PathVariable Long id) {
         log.info("GET /api/v1/species/{}/protection", id);
         TaxonDetailsResponse details = taxonDataService.getSpeciesDetails(id, "en");
         return ResponseEntity.ok(details.getProtection());
     }
-    
+
     @GetMapping("/{id}/dus-guidance")
     public ResponseEntity<DUSCooperationInfo> getDUSGuidance(@PathVariable Long id) {
         log.info("GET /api/v1/species/{}/dus-guidance", id);
@@ -66,4 +71,3 @@ public class TaxonRestController {
         return ResponseEntity.ok(details.getDusGuidance());
     }
 }
-
