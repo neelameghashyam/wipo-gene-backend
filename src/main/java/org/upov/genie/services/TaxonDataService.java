@@ -1,4 +1,4 @@
-// TaxonDataService.java - Fixed with separate queries
+// TaxonDataService.java - Add denomination repository
 package org.upov.genie.services;
 
 import lombok.RequiredArgsConstructor;
@@ -31,6 +31,7 @@ public class TaxonDataService {
     private final SpeciesUtilizationRepository utilizationRepository;
     private final GenieFamilyRepository genieFamilyRepository;
     private final GenieTWPRepository genieTWPRepository;
+    private final GenieDenominationRepository genieDenominationRepository;  // NEW
     private final TaxonResponseMapper taxonMapper;
 
     public TaxonDetailsResponse getSpeciesDetails(Long genieId, String lang) {
@@ -46,9 +47,11 @@ public class TaxonDataService {
         List<SpeciesUtilization> utilizations = utilizationRepository.findByGenieIdForCooperation(genieId);
         List<GenieFamily> families = genieFamilyRepository.findByGenieIdWithFamily(genieId);
         List<GenieTWP> twps = genieTWPRepository.findByGenieIdWithTWP(genieId);
+        List<GenieDenomination> denominations = genieDenominationRepository.findByGenieIdWithDenomination(genieId);  // NEW
 
         return taxonMapper.toDetailsResponse(
-            genie, names, protections, experiences, offerings, utilizations, families, twps, lang
+            genie, names, protections, experiences, offerings, utilizations, 
+            families, twps, denominations, lang  // UPDATED
         );
     }
 
