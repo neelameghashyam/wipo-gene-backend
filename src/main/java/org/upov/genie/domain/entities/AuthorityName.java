@@ -8,35 +8,25 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "SPECIES_OFFERING", schema = "genie")
-public class SpeciesOffering {
+@Table(name = "AUTHORITY_NAME", schema = "genie")
+public class AuthorityName {
     
     @Id
-    @Column(name = "SPECIES_OFFERING_ID")
-    private Long speciesOfferingId;
-
-    @Column(name = "GENIE_ID")
-    private Long genieId;
+    @Column(name = "AUTHORITY_NAME_ID")
+    private Long authorityNameId;
 
     @Column(name = "AUTHORITY_ID")
     private Long authorityId;
 
-    @Column(name = "DERIVATION_ID")
-    private Long derivationId;
+    @Column(name = "LANGUAGE_ID")
+    private Integer languageId;
 
-    @Column(name = "OFFERING_STRING")
-    private String offeringString;
-
-    @Column(name = "EO_DESIGNATION")
-    private String eoDesignation;
+    @Column(name = "AUTHORITY_NAME")
+    private String authorityName;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "AUTHORITY_ID", insertable = false, updatable = false)
     private UpovAuthority authority;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "DERIVATION_ID", insertable = false, updatable = false)
-    private Derivation derivation;  // CORRECT: Use Derivation
 
     @Column(name = "CREATE_DATE")
     private LocalDateTime createDate;

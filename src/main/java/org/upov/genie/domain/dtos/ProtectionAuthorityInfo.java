@@ -6,11 +6,12 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class PracticalExperienceInfo {
+public class ProtectionAuthorityInfo {
     private Long authorityId;
     private String authorityName;
     private String authorityCode;
+    private String status;
+    private String protectionType;
     private boolean isDerived;
-    private boolean isChildExperience;
-    private String notes;  // NOT noteSequence
+    private String notes;
 }

@@ -8,35 +8,25 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "SPECIES_UTILIZATION", schema = "genie")
-public class SpeciesUtilization {
+@Table(name = "GENIE_GUIDELINE", schema = "genie")
+public class GenieGuideline {
     
     @Id
-    @Column(name = "SPECIES_UTILIZATION_ID")
-    private Long speciesUtilizationId;
+    @Column(name = "GENIE_GUIDELINE_ID")
+    private Long genieGuidelineId;
 
     @Column(name = "GENIE_ID")
     private Long genieId;
 
-    @Column(name = "UTILIZING_AUTHORITY_ID")
-    private Long utilizingAuthorityId;
-
-    @Column(name = "PROVIDING_AUTHORITY_ID")
-    private Long providingAuthorityId;
+    @Column(name = "GUIDELINE_ID")
+    private Long guidelineId;
 
     @Column(name = "DERIVATION_ID")
     private Long derivationId;
 
-    @Column(name = "NOTE_STRING")  // ADD THIS
-    private String noteString;      // ADD THIS
-
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "UTILIZING_AUTHORITY_ID", insertable = false, updatable = false)
-    private UpovAuthority utilizingAuthority;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "PROVIDING_AUTHORITY_ID", insertable = false, updatable = false)
-    private UpovAuthority providingAuthority;
+    @JoinColumn(name = "GUIDELINE_ID", insertable = false, updatable = false)
+    private Guideline guideline;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "DERIVATION_ID", insertable = false, updatable = false)

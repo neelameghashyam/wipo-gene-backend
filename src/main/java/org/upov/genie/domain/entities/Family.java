@@ -1,8 +1,8 @@
-// Family.java - New entity
 package org.upov.genie.domain.entities;
 
 import jakarta.persistence.*;
 import lombok.*;
+import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
@@ -10,6 +10,7 @@ import lombok.*;
 @Entity
 @Table(name = "FAMILY", schema = "genie")
 public class Family {
+    
     @Id
     @Column(name = "FAMILY_ID")
     private Long familyId;
@@ -18,5 +19,20 @@ public class Family {
     private String familyName;
 
     @Column(name = "CATEGORY_ID")
-    private Integer categoryId;
+    private Long categoryId;  // ADD THIS FIELD
+
+    @Column(name = "FAMILY_SORT")
+    private String familySort;
+
+    @Column(name = "CREATE_DATE")
+    private LocalDateTime createDate;
+
+    @Column(name = "CREATE_USER")
+    private String createUser;
+
+    @Column(name = "UPDATE_DATE")
+    private LocalDateTime updateDate;
+
+    @Column(name = "UPDATE_USER")
+    private String updateUser;
 }

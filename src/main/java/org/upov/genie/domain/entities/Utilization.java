@@ -8,12 +8,12 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "SPECIES_UTILIZATION", schema = "genie")
-public class SpeciesUtilization {
+@Table(name = "UTILIZATION", schema = "genie")
+public class Utilization {
     
     @Id
-    @Column(name = "SPECIES_UTILIZATION_ID")
-    private Long speciesUtilizationId;
+    @Column(name = "UTILIZATION_ID")
+    private Long utilizationId;
 
     @Column(name = "GENIE_ID")
     private Long genieId;
@@ -24,11 +24,26 @@ public class SpeciesUtilization {
     @Column(name = "PROVIDING_AUTHORITY_ID")
     private Long providingAuthorityId;
 
+    @Column(name = "UTILIZING_STRING")
+    private String utilizingString;
+
+    @Column(name = "PROVIDING_STRING")
+    private String providingString;
+
     @Column(name = "DERIVATION_ID")
     private Long derivationId;
 
-    @Column(name = "NOTE_STRING")  // ADD THIS
-    private String noteString;      // ADD THIS
+    @Column(name = "EXCLUDE_UTILIZATION")
+    private String excludeUtilization;
+
+    @Column(name = "UTILIZATION_RULE_ID")
+    private Long utilizationRuleId;
+
+    @Column(name = "NOTE_STRING")
+    private String noteString;
+
+    @Column(name = "WITH_NOTES")
+    private String withNotes;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "UTILIZING_AUTHORITY_ID", insertable = false, updatable = false)

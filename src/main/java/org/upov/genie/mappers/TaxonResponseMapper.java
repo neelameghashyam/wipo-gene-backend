@@ -1,4 +1,3 @@
-// TaxonResponseMapper.java - UPDATED with new fields
 package org.upov.genie.mappers;
 
 import org.springframework.stereotype.Component;
@@ -28,15 +27,11 @@ public class TaxonResponseMapper {
         "TWV", "Vegetable"
     );
 
-    /**
-     * Map GenieSpecies to TaxonListItemEnhanced with all required fields
-     */
     public TaxonListItemEnhanced toListItemEnhanced(
             GenieSpecies genie, 
             List<GenieFamily> families, 
             List<GenieTWP> twps) {
         
-        // Get default name
         String defaultName = "";
         if (genie.getNames() != null) {
             defaultName = genie.getNames().stream()
@@ -45,7 +40,6 @@ public class TaxonResponseMapper {
                 .collect(Collectors.joining("; "));
         }
 
-        // Get family names
         String family = "";
         if (families != null && !families.isEmpty()) {
             family = families.stream()
@@ -55,7 +49,6 @@ public class TaxonResponseMapper {
                 .collect(Collectors.joining(", "));
         }
 
-        // Get crop types from TWP
         String cropType = "";
         if (twps != null && !twps.isEmpty()) {
             Set<String> cropTypes = new LinkedHashSet<>();
@@ -71,22 +64,27 @@ public class TaxonResponseMapper {
             cropType = String.join(", ", cropTypes);
         }
 
-        // Get authority information
         List<String> authorityNames = new ArrayList<>();
         List<String> authorityIsoCodes = new ArrayList<>();
         
         if (genie.getProtections() != null) {
-            genie.getProtections().stream()
-                .filter(p -> p.getAuthority() != null)
-                .forEach(p -> {
+            for (GenieSpeciesProtection p : genie.getProtections()) {
+                if (p.getAuthority() != null) {
                     UpovAuthority auth = p.getAuthority();
-                    if (auth.getAuthorityName() != null && !authorityNames.contains(auth.getAuthorityName())) {
-                        authorityNames.add(auth.getAuthorityName());
+                    if (auth.getNames() != null && !auth.getNames().isEmpty()) {
+                        String name = auth.getNames().stream()
+                            .findFirst()
+                            .map(AuthorityName::getAuthorityName)
+                            .orElse(auth.getAuthorityCode());
+                        if (!authorityNames.contains(name)) {
+                            authorityNames.add(name);
+                        }
                     }
                     if (auth.getAuthorityCode() != null && !authorityIsoCodes.contains(auth.getAuthorityCode())) {
                         authorityIsoCodes.add(auth.getAuthorityCode());
                     }
-                });
+                }
+            }
         }
 
         return TaxonListItemEnhanced.builder()
@@ -103,9 +101,6 @@ public class TaxonResponseMapper {
             .build();
     }
 
-    /**
-     * Map GenieSpecies to TaxonDetailsResponse with full details
-     */
     public TaxonDetailsResponse toDetailsResponse(
             GenieSpecies genie,
             List<GenieSpeciesName> names,
@@ -115,10 +110,9 @@ public class TaxonResponseMapper {
             List<SpeciesUtilization> utilizations,
             List<GenieFamily> families,
             List<GenieTWP> twps,
-            List<GenieDenomination> denominations,  // NEW
+            List<GenieDenomination> denominations,
             String lang) {
 
-        // Get family
         String family = "";
         if (families != null && !families.isEmpty()) {
             family = families.stream()
@@ -128,7 +122,6 @@ public class TaxonResponseMapper {
                 .collect(Collectors.joining(", "));
         }
 
-        // Get crop type
         String cropType = "";
         if (twps != null && !twps.isEmpty()) {
             Set<String> cropTypes = new LinkedHashSet<>();
@@ -144,7 +137,6 @@ public class TaxonResponseMapper {
             cropType = String.join(", ", cropTypes);
         }
 
-        // Get TWP string
         String twp = "";
         if (twps != null && !twps.isEmpty()) {
             Set<String> twpCodes = new LinkedHashSet<>();
@@ -161,18 +153,16 @@ public class TaxonResponseMapper {
             twp = String.join(", ", twpCodes);
         }
 
-        // NEW: Get other botanical names (exclude default name and the main botanical name)
         String otherBotanicalNames = "";
         if (names != null && !names.isEmpty()) {
             otherBotanicalNames = names.stream()
-                .filter(n -> !"Y".equals(n.getDefaultName())) // Exclude default names
-                .filter(n -> !genie.getGenieName().equals(n.getGenieName())) // Exclude main botanical name
+                .filter(n -> !"Y".equals(n.getDefaultName()))
+                .filter(n -> !genie.getGenieName().equals(n.getGenieName()))
                 .map(GenieSpeciesName::getGenieName)
                 .distinct()
                 .collect(Collectors.joining("; "));
         }
 
-        // NEW: Get denomination class
         String denominationClass = "";
         if (denominations != null && !denominations.isEmpty()) {
             denominationClass = denominations.stream()
@@ -187,12 +177,12 @@ public class TaxonResponseMapper {
             .genieId(genie.getGenieId())
             .upovCode(genie.getUpovCode())
             .botanicalName(genie.getGenieName())
-            .otherBotanicalNames(otherBotanicalNames)  // NEW
-            .denominationClass(denominationClass)       // NEW
+            .otherBotanicalNames(otherBotanicalNames)
+            .denominationClass(denominationClass)
             .family(family)
             .cropType(cropType)
             .twp(twp)
-            .denomClass(denominationClass)  // Keep for backward compatibility
+            .denomClass(denominationClass)
             .testGuideline("")
             .names(mapNames(names))
             .protection(mapProtections(protections))
@@ -200,9 +190,6 @@ public class TaxonResponseMapper {
             .build();
     }
 
-    /**
-     * Map GenieSpeciesName list to TaxonNamesInfo
-     */
     private TaxonNamesInfo mapNames(List<GenieSpeciesName> names) {
         if (names == null) {
             return TaxonNamesInfo.builder()
@@ -238,26 +225,23 @@ public class TaxonResponseMapper {
             .build();
     }
 
-    /**
-     * Map protection list to AuthorityProtectionInfo list
-     */
     private List<AuthorityProtectionInfo> mapProtections(List<GenieSpeciesProtection> protections) {
         if (protections == null) return new ArrayList<>();
 
-        return protections.stream()
-            .filter(p -> p.getAuthority() != null && p.getDerivation() != null)
-            .map(p -> AuthorityProtectionInfo.builder()
-                .authorityCode(p.getAuthority().getAuthorityCode())
-                .protectionType(getProtectionType(p.getProtectionId()))
-                .isDerived("Y".equals(p.getDerivation().getDerivationIndicator()))
-                .notes(p.getNoteString())
-                .build())
-            .collect(Collectors.toList());
+        List<AuthorityProtectionInfo> result = new ArrayList<>();
+        for (GenieSpeciesProtection p : protections) {
+            if (p.getAuthority() != null && p.getDerivation() != null) {
+                result.add(AuthorityProtectionInfo.builder()
+                    .authorityCode(p.getAuthority().getAuthorityCode())
+                    .protectionType(getProtectionType(p.getProtectionId()))
+                    .isDerived("Y".equals(p.getDerivation().getDerivationIndicator()))
+                    .notes(p.getNoteString())
+                    .build());
+            }
+        }
+        return result;
     }
 
-    /**
-     * Map DUS guidance information
-     */
     private DUSCooperationInfo mapDUSGuidance(
             List<SpeciesExperience> experiences,
             List<SpeciesOffering> offerings,
@@ -272,54 +256,54 @@ public class TaxonResponseMapper {
             .build();
     }
 
-    /**
-     * Map experience list to PracticalExperienceInfo list
-     */
     private List<PracticalExperienceInfo> mapExperiences(List<SpeciesExperience> experiences) {
-        if (experiences == null) return new ArrayList<>();
+    if (experiences == null) return new ArrayList<>();
 
-        return experiences.stream()
-            .filter(e -> e.getAuthority() != null && e.getDerivation() != null)
-            .map(e -> PracticalExperienceInfo.builder()
+    List<PracticalExperienceInfo> result = new ArrayList<>();
+    for (SpeciesExperience e : experiences) {
+        if (e.getAuthority() != null && e.getDerivation() != null) {
+            result.add(PracticalExperienceInfo.builder()
                 .authorityCode(e.getAuthority().getAuthorityCode())
                 .isDerived("Y".equals(e.getDerivation().getDerivationIndicator()))
-                .noteSequence(e.getNoteString())
-                .build())
-            .collect(Collectors.toList());
+                .notes(e.getNoteString())  // CHANGE FROM noteSequence to notes
+                .build());
+        }
     }
+    return result;
+}
 
-    /**
-     * Map offering list to CooperationOfferingInfo list
-     */
     private List<CooperationOfferingInfo> mapOfferings(List<SpeciesOffering> offerings) {
         if (offerings == null) return new ArrayList<>();
 
-        return offerings.stream()
-            .filter(o -> o.getAuthority() != null)
-            .map(o -> CooperationOfferingInfo.builder()
-                .authorityCode(o.getAuthority().getAuthorityCode())
-                .offeringString(o.getOfferingString())
-                .isEoDesignation("Y".equals(o.getEoDesignation()))
-                .isDerived(o.getDerivation() != null && "Y".equals(o.getDerivation().getDerivationIndicator()))
-                .build())
-            .collect(Collectors.toList());
+        List<CooperationOfferingInfo> result = new ArrayList<>();
+        for (SpeciesOffering o : offerings) {
+            if (o.getAuthority() != null) {
+                result.add(CooperationOfferingInfo.builder()
+                    .offeringAuthorityCode(o.getAuthority().getAuthorityCode())
+                    .offeringString(o.getOfferingString())
+                    .isEoDesignation("Y".equals(o.getEoDesignation()))
+                    .isDerived(o.getDerivation() != null && "Y".equals(o.getDerivation().getDerivationIndicator()))
+                    .build());
+            }
+        }
+        return result;
     }
 
-    /**
-     * Map utilization list to ReportUtilizationInfo list
-     */
     private List<ReportUtilizationInfo> mapUtilizations(List<SpeciesUtilization> utilizations) {
         if (utilizations == null) return new ArrayList<>();
 
-        return utilizations.stream()
-            .filter(u -> u.getUtilizingAuthority() != null && u.getProvidingAuthority() != null)
-            .map(u -> ReportUtilizationInfo.builder()
-                .utilizingAuthority(u.getUtilizingAuthority().getAuthorityCode())
-                .providingAuthority(u.getProvidingAuthority().getAuthorityCode())
-                .isDerived(u.getDerivation() != null && "Y".equals(u.getDerivation().getDerivationIndicator()))
-                .noteSequence(u.getNoteString())
-                .build())
-            .collect(Collectors.toList());
+        List<ReportUtilizationInfo> result = new ArrayList<>();
+        for (SpeciesUtilization u : utilizations) {
+            if (u.getUtilizingAuthority() != null && u.getProvidingAuthority() != null) {
+                result.add(ReportUtilizationInfo.builder()
+                    .utilizingAuthority(u.getUtilizingAuthority().getAuthorityCode())
+                    .providingAuthority(u.getProvidingAuthority().getAuthorityCode())
+                    .isDerived(u.getDerivation() != null && "Y".equals(u.getDerivation().getDerivationIndicator()))
+                    .noteSequence(u.getNoteString())
+                    .build());
+            }
+        }
+        return result;
     }
 
     public ProtectionReportResponse toProtectionReportResponse(
@@ -327,13 +311,17 @@ public class TaxonResponseMapper {
             List<GenieSpeciesName> names,
             List<GenieSpeciesProtection> protections) {
 
-        List<String> authorities = protections != null 
-            ? protections.stream()
-                .filter(p -> p.getDerivation() != null && p.getAuthority() != null)
-                .map(p -> p.getAuthority().getAuthorityCode())
-                .distinct()
-                .collect(Collectors.toList())
-            : new ArrayList<>();
+        List<String> authorities = new ArrayList<>();
+        if (protections != null) {
+            for (GenieSpeciesProtection p : protections) {
+                if (p.getDerivation() != null && p.getAuthority() != null) {
+                    String code = p.getAuthority().getAuthorityCode();
+                    if (!authorities.contains(code)) {
+                        authorities.add(code);
+                    }
+                }
+            }
+        }
 
         return ProtectionReportResponse.builder()
             .upovCode(genie.getUpovCode())
@@ -359,9 +347,6 @@ public class TaxonResponseMapper {
             .build();
     }
 
-    /**
-     * Get protection type description from protection ID
-     */
     private String getProtectionType(Integer protectionId) {
         if (protectionId == null) return "Unknown";
         return switch (protectionId) {

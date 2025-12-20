@@ -1,13 +1,19 @@
 package org.upov.genie.domain.dtos;
 
-import lombok.Data;
-import lombok.Builder;
+import lombok.*;
+import java.util.List;
 
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class CooperationOfferingInfo {
-    private String authorityCode;
-    private String offeringString;
+    private Long offeringAuthorityId;
+    private String offeringAuthorityName;
+    private String offeringAuthorityCode;
+    private List<ReceivingAuthorityInfo> receivingAuthorities;
     private boolean isEoDesignation;
     private boolean isDerived;
+    private String offeringString;
+    private String notes;
 }

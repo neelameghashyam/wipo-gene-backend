@@ -8,18 +8,18 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "PROTECTION_DERIVATION", schema = "genie")
-public class ProtectionDerivation {
+@Table(name = "AUTHORITY_TYPE", schema = "genie")
+public class AuthorityType {
     
     @Id
-    @Column(name = "PROTECTION_DERIVATION_ID")
-    private Long protectionDerivationId;
+    @Column(name = "AUTHORITY_TYPE_ID")
+    private Long authorityTypeId;
 
-    @Column(name = "PROTECTION_ID")
-    private Long protectionId;
+    @Column(name = "AUTHORITY_ID")
+    private Long authorityId;
 
-    @Column(name = "DERIVATION_ID")
-    private Long derivationId;
+    @Column(name = "AUTHORITY_TYPE")
+    private String authorityType;
 
     @Column(name = "CREATE_DATE")
     private LocalDateTime createDate;

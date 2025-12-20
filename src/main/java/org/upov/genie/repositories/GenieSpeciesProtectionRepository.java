@@ -13,10 +13,19 @@ public interface GenieSpeciesProtectionRepository extends JpaRepository<GenieSpe
     
     @Query("SELECT gp FROM GenieSpeciesProtection gp " +
            "LEFT JOIN FETCH gp.authority " +
+           "LEFT JOIN FETCH gp.protection " +
            "LEFT JOIN FETCH gp.derivation " +
-           "WHERE gp.genieSpecies.genieId = :genieId " +
-           "AND gp.protectionActive = 'Y' " +
-           "ORDER BY gp.authority.authorityCode, gp.derivation.derivationId")
+           "WHERE gp.genieId = :genieId " +
+           "ORDER BY gp.authority.authorityCode")
     List<GenieSpeciesProtection> findByGenieIdWithDetails(@Param("genieId") Long genieId);
-}
 
+    @Query("SELECT gp FROM GenieSpeciesProtection gp " +
+           "LEFT JOIN FETCH gp.authority a " +
+           "LEFT JOIN FETCH gp.protection " +
+           "LEFT JOIN FETCH gp.derivation " +
+           "LEFT JOIN FETCH gp.genieSpecies " +
+           "WHERE gp.authorityId = :authorityId " +
+           "AND gp.genieSpecies.codeActive = 'Y' " +
+           "ORDER BY gp.genieSpecies.upovCode")
+    List<GenieSpeciesProtection> findByAuthorityIdWithDetails(@Param("authorityId") Long authorityId);
+}

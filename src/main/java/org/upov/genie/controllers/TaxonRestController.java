@@ -1,4 +1,3 @@
-// TaxonRestController.java - Updated
 package org.upov.genie.controllers;
 
 import lombok.RequiredArgsConstructor;
@@ -19,55 +18,63 @@ public class TaxonRestController {
 
     private final TaxonDataService taxonDataService;
 
-    @GetMapping("/{id}")
-    public ResponseEntity<TaxonDetailsResponse> getSpeciesDetails(
-        @PathVariable Long id,
-        @RequestParam(defaultValue = "en") String lang
-    ) {
-        log.info("GET /api/v1/species/{} - lang: {}", id, lang);
-        TaxonDetailsResponse details = taxonDataService.getSpeciesDetails(id, lang);
-        return ResponseEntity.ok(details);
-    }
-
     @GetMapping
     public ResponseEntity<TaxonSearchEnhancedResponse> getAllSpecies(
-        @RequestParam(defaultValue = "0") int page,
-        @RequestParam(defaultValue = "20") int size
-    ) {
-        log.info("GET /api/v1/species - page: {}, size: {}", page, size);
-        TaxonSearchEnhancedResponse response = taxonDataService.getAllSpecies(page, size);
-        return ResponseEntity.ok(response);
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int pageSize) {
+        
+        log.info("Request: GET /api/v1/species?page={}&pageSize={}", page, pageSize);
+        return ResponseEntity.ok(taxonDataService.getAllSpecies(page, pageSize));
     }
 
     @GetMapping("/search")
     public ResponseEntity<List<TaxonListItemEnhanced>> searchSpecies(
-        @RequestParam String q,
-        @RequestParam(defaultValue = "0") int page,
-        @RequestParam(defaultValue = "20") int size
-    ) {
-        log.info("GET /api/v1/species/search?q={}, page={}, size={}", q, page, size);
-        List<TaxonListItemEnhanced> results = taxonDataService.searchSpecies(q, page, size);
-        return ResponseEntity.ok(results);
+            @RequestParam String q,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int pageSize) {
+        
+        log.info("Request: GET /api/v1/species/search?q={}&page={}&pageSize={}", q, page, pageSize);
+        return ResponseEntity.ok(taxonDataService.searchSpecies(q, page, pageSize));
     }
 
-    @GetMapping("/{id}/names")
-    public ResponseEntity<TaxonNamesInfo> getSpeciesNames(@PathVariable Long id) {
-        log.info("GET /api/v1/species/{}/names", id);
-        TaxonDetailsResponse details = taxonDataService.getSpeciesDetails(id, "en");
-        return ResponseEntity.ok(details.getNames());
+    @GetMapping("/{id}")
+    public ResponseEntity<TaxonDetailsResponse> getSpeciesDetails(
+            @PathVariable Long id,
+            @RequestParam(defaultValue = "en") String lang) {
+        
+        log.info("Request: GET /api/v1/species/{}?lang={}", id, lang);
+        return ResponseEntity.ok(taxonDataService.getSpeciesDetails(id, lang));
     }
 
     @GetMapping("/{id}/protection")
-    public ResponseEntity<List<AuthorityProtectionInfo>> getSpeciesProtection(@PathVariable Long id) {
-        log.info("GET /api/v1/species/{}/protection", id);
-        TaxonDetailsResponse details = taxonDataService.getSpeciesDetails(id, "en");
-        return ResponseEntity.ok(details.getProtection());
+    public ResponseEntity<SpeciesProtectionInfo> getSpeciesProtection(
+            @PathVariable Long id,
+            @RequestParam(defaultValue = "en") String lang) {
+        
+        log.info("Request: GET /api/v1/species/{}/protection?lang={}", id, lang);
+        return ResponseEntity.ok(taxonDataService.getSpeciesProtection(id, lang));
     }
 
-    @GetMapping("/{id}/dus-guidance")
-    public ResponseEntity<DUSCooperationInfo> getDUSGuidance(@PathVariable Long id) {
-        log.info("GET /api/v1/species/{}/dus-guidance", id);
-        TaxonDetailsResponse details = taxonDataService.getSpeciesDetails(id, "en");
-        return ResponseEntity.ok(details.getDusGuidance());
+    @GetMapping("/{id}/dus")
+    public ResponseEntity<SpeciesDUSInfo> getSpeciesDUS(
+            @PathVariable Long id,
+            @RequestParam(defaultValue = "en") String lang) {
+        
+        log.info("Request: GET /api/v1/species/{}/dus?lang={}", id, lang);
+        return ResponseEntity.ok(taxonDataService.getSpeciesDUS(id, lang));
+    }
+
+    @GetMapping("/reports/protection")
+    public ResponseEntity<List<ProtectionReportResponse>> getProtectionReport() {
+        log.info("Request: GET /api/v1/species/reports/protection");
+        return ResponseEntity.ok(taxonDataService.getProtectionReport());
+    }
+
+    @GetMapping("/reports/cooperation")
+    public ResponseEntity<List<CooperationReportResponse>> getCooperationReport(
+            @RequestParam(defaultValue = "true") boolean includeDerived) {
+        
+        log.info("Request: GET /api/v1/species/reports/cooperation?includeDerived={}", includeDerived);
+        return ResponseEntity.ok(taxonDataService.getCooperationReport(includeDerived));
     }
 }
