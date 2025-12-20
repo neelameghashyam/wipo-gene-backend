@@ -1,4 +1,3 @@
-// TaxonResponseMapper.java - UPDATED with new fields
 package org.upov.genie.mappers;
 
 import org.springframework.stereotype.Component;
@@ -27,6 +26,13 @@ public class TaxonResponseMapper {
         "TWO-O", "Ornamental",
         "TWV", "Vegetable"
     );
+    
+    private static final Map<Integer, String> PROTECTION_TYPE_MAP = Map.of(
+        2, "Selected species",
+        5, "All species",
+        3, "Families (all)",
+        7, "Families"
+    );
 
     /**
      * Map GenieSpecies to TaxonListItemEnhanced with all required fields
@@ -36,7 +42,6 @@ public class TaxonResponseMapper {
             List<GenieFamily> families, 
             List<GenieTWP> twps) {
         
-        // Get default name
         String defaultName = "";
         if (genie.getNames() != null) {
             defaultName = genie.getNames().stream()
@@ -45,7 +50,6 @@ public class TaxonResponseMapper {
                 .collect(Collectors.joining("; "));
         }
 
-        // Get family names
         String family = "";
         if (families != null && !families.isEmpty()) {
             family = families.stream()
@@ -55,7 +59,6 @@ public class TaxonResponseMapper {
                 .collect(Collectors.joining(", "));
         }
 
-        // Get crop types from TWP
         String cropType = "";
         if (twps != null && !twps.isEmpty()) {
             Set<String> cropTypes = new LinkedHashSet<>();
@@ -71,7 +74,6 @@ public class TaxonResponseMapper {
             cropType = String.join(", ", cropTypes);
         }
 
-        // Get authority information
         List<String> authorityNames = new ArrayList<>();
         List<String> authorityIsoCodes = new ArrayList<>();
         
@@ -115,10 +117,9 @@ public class TaxonResponseMapper {
             List<SpeciesUtilization> utilizations,
             List<GenieFamily> families,
             List<GenieTWP> twps,
-            List<GenieDenomination> denominations,  // NEW
+            List<GenieDenomination> denominations,
             String lang) {
 
-        // Get family
         String family = "";
         if (families != null && !families.isEmpty()) {
             family = families.stream()
@@ -128,7 +129,6 @@ public class TaxonResponseMapper {
                 .collect(Collectors.joining(", "));
         }
 
-        // Get crop type
         String cropType = "";
         if (twps != null && !twps.isEmpty()) {
             Set<String> cropTypes = new LinkedHashSet<>();
@@ -144,7 +144,6 @@ public class TaxonResponseMapper {
             cropType = String.join(", ", cropTypes);
         }
 
-        // Get TWP string
         String twp = "";
         if (twps != null && !twps.isEmpty()) {
             Set<String> twpCodes = new LinkedHashSet<>();
@@ -161,18 +160,16 @@ public class TaxonResponseMapper {
             twp = String.join(", ", twpCodes);
         }
 
-        // NEW: Get other botanical names (exclude default name and the main botanical name)
         String otherBotanicalNames = "";
         if (names != null && !names.isEmpty()) {
             otherBotanicalNames = names.stream()
-                .filter(n -> !"Y".equals(n.getDefaultName())) // Exclude default names
-                .filter(n -> !genie.getGenieName().equals(n.getGenieName())) // Exclude main botanical name
+                .filter(n -> !"Y".equals(n.getDefaultName()))
+                .filter(n -> !genie.getGenieName().equals(n.getGenieName()))
                 .map(GenieSpeciesName::getGenieName)
                 .distinct()
                 .collect(Collectors.joining("; "));
         }
 
-        // NEW: Get denomination class
         String denominationClass = "";
         if (denominations != null && !denominations.isEmpty()) {
             denominationClass = denominations.stream()
@@ -187,12 +184,12 @@ public class TaxonResponseMapper {
             .genieId(genie.getGenieId())
             .upovCode(genie.getUpovCode())
             .botanicalName(genie.getGenieName())
-            .otherBotanicalNames(otherBotanicalNames)  // NEW
-            .denominationClass(denominationClass)       // NEW
+            .otherBotanicalNames(otherBotanicalNames)
+            .denominationClass(denominationClass)
             .family(family)
             .cropType(cropType)
             .twp(twp)
-            .denomClass(denominationClass)  // Keep for backward compatibility
+            .denomClass(denominationClass)
             .testGuideline("")
             .names(mapNames(names))
             .protection(mapProtections(protections))
@@ -202,8 +199,9 @@ public class TaxonResponseMapper {
 
     /**
      * Map GenieSpeciesName list to TaxonNamesInfo
+     * CHANGED: Made public so AuthorityResponseMapper can use it
      */
-    private TaxonNamesInfo mapNames(List<GenieSpeciesName> names) {
+    public TaxonNamesInfo mapNames(List<GenieSpeciesName> names) {
         if (names == null) {
             return TaxonNamesInfo.builder()
                 .defaultName("")
@@ -238,9 +236,6 @@ public class TaxonResponseMapper {
             .build();
     }
 
-    /**
-     * Map protection list to AuthorityProtectionInfo list
-     */
     private List<AuthorityProtectionInfo> mapProtections(List<GenieSpeciesProtection> protections) {
         if (protections == null) return new ArrayList<>();
 
@@ -255,9 +250,6 @@ public class TaxonResponseMapper {
             .collect(Collectors.toList());
     }
 
-    /**
-     * Map DUS guidance information
-     */
     private DUSCooperationInfo mapDUSGuidance(
             List<SpeciesExperience> experiences,
             List<SpeciesOffering> offerings,
@@ -272,9 +264,6 @@ public class TaxonResponseMapper {
             .build();
     }
 
-    /**
-     * Map experience list to PracticalExperienceInfo list
-     */
     private List<PracticalExperienceInfo> mapExperiences(List<SpeciesExperience> experiences) {
         if (experiences == null) return new ArrayList<>();
 
@@ -288,9 +277,6 @@ public class TaxonResponseMapper {
             .collect(Collectors.toList());
     }
 
-    /**
-     * Map offering list to CooperationOfferingInfo list
-     */
     private List<CooperationOfferingInfo> mapOfferings(List<SpeciesOffering> offerings) {
         if (offerings == null) return new ArrayList<>();
 
@@ -305,9 +291,6 @@ public class TaxonResponseMapper {
             .collect(Collectors.toList());
     }
 
-    /**
-     * Map utilization list to ReportUtilizationInfo list
-     */
     private List<ReportUtilizationInfo> mapUtilizations(List<SpeciesUtilization> utilizations) {
         if (utilizations == null) return new ArrayList<>();
 
@@ -359,17 +342,8 @@ public class TaxonResponseMapper {
             .build();
     }
 
-    /**
-     * Get protection type description from protection ID
-     */
     private String getProtectionType(Integer protectionId) {
         if (protectionId == null) return "Unknown";
-        return switch (protectionId) {
-            case 2 -> "Selected species";
-            case 5 -> "All species";
-            case 3 -> "Families (all)";
-            case 7 -> "Families";
-            default -> "Unknown";
-        };
+        return PROTECTION_TYPE_MAP.getOrDefault(protectionId, "Unknown");
     }
 }

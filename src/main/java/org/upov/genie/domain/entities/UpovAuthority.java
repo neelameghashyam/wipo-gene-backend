@@ -3,6 +3,7 @@ package org.upov.genie.domain.entities;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -49,5 +50,8 @@ public class UpovAuthority {
     
     @Column(name = "ADMINISTRATIVE_WEB_ADDRESS")
     private String administrativeWebAddress;
+    
+    // NEW: Add relationship to authority types
+    @OneToMany(mappedBy = "authority", fetch = FetchType.LAZY)
+    private List<AuthorityTypes> authorityTypes;
 }
-
