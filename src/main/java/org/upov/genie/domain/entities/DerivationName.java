@@ -24,6 +24,11 @@ public class DerivationName {
     @Column(name = "DERIVATION_NAME")
     private String derivationName;
 
+    // ADD THIS RELATIONSHIP - This is what was missing!
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "DERIVATION_ID", insertable = false, updatable = false)
+    private Derivation derivation;
+
     @Column(name = "CREATE_DATE")
     private LocalDateTime createDate;
 
