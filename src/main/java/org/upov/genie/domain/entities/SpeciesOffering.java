@@ -36,7 +36,12 @@ public class SpeciesOffering {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "DERIVATION_ID", insertable = false, updatable = false)
-    private Derivation derivation;  // CORRECT: Use Derivation
+    private Derivation derivation;
+
+    // ADD THIS RELATIONSHIP - This is what was missing!
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "GENIE_ID", insertable = false, updatable = false)
+    private GenieSpecies genieSpecies;
 
     @Column(name = "CREATE_DATE")
     private LocalDateTime createDate;

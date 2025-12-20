@@ -27,8 +27,8 @@ public class SpeciesUtilization {
     @Column(name = "DERIVATION_ID")
     private Long derivationId;
 
-    @Column(name = "NOTE_STRING")  // ADD THIS
-    private String noteString;      // ADD THIS
+    @Column(name = "NOTE_STRING")
+    private String noteString;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "UTILIZING_AUTHORITY_ID", insertable = false, updatable = false)
@@ -41,6 +41,11 @@ public class SpeciesUtilization {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "DERIVATION_ID", insertable = false, updatable = false)
     private Derivation derivation;
+
+    // ADD THIS RELATIONSHIP
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "GENIE_ID", insertable = false, updatable = false)
+    private GenieSpecies genieSpecies;
 
     @Column(name = "CREATE_DATE")
     private LocalDateTime createDate;
