@@ -10,5 +10,7 @@ public class AuthorityProtectionInfo {
     private String protectionType;
     private boolean isDerived;
     private String notes;
+    private String authorityName;
+    private String administrativeWebsite;
+    private String lawWebsite;
 }
-

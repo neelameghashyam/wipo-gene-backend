@@ -10,5 +10,12 @@ public class ReportUtilizationInfo {
     private String providingAuthority;
     private boolean isDerived;
     private String noteSequence;
+    
+    private String utilizingAuthorityName;
+    private String utilizingAdministrativeWebsite;
+    private String utilizingLawWebsite;
+    
+    private String providingAuthorityName;
+    private String providingAdministrativeWebsite;
+    private String providingLawWebsite;
 }
-

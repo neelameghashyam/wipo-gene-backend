@@ -10,4 +10,7 @@ public class CooperationOfferingInfo {
     private String offeringString;
     private boolean isEoDesignation;
     private boolean isDerived;
+    private String authorityName;
+    private String administrativeWebsite;
+    private String lawWebsite;
 }

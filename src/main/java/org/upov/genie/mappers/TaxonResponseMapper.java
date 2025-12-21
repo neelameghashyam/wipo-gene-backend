@@ -1,3 +1,6 @@
+// ============================================================================
+// TaxonResponseMapper.java - UPDATED to include authority details
+// ============================================================================
 package org.upov.genie.mappers;
 
 import org.springframework.stereotype.Component;
@@ -34,9 +37,6 @@ public class TaxonResponseMapper {
         7, "Families"
     );
 
-    /**
-     * Map GenieSpecies to TaxonListItemEnhanced with all required fields
-     */
     public TaxonListItemEnhanced toListItemEnhanced(
             GenieSpecies genie, 
             List<GenieFamily> families, 
@@ -105,9 +105,6 @@ public class TaxonResponseMapper {
             .build();
     }
 
-    /**
-     * Map GenieSpecies to TaxonDetailsResponse with full details
-     */
     public TaxonDetailsResponse toDetailsResponse(
             GenieSpecies genie,
             List<GenieSpeciesName> names,
@@ -197,10 +194,6 @@ public class TaxonResponseMapper {
             .build();
     }
 
-    /**
-     * Map GenieSpeciesName list to TaxonNamesInfo
-     * CHANGED: Made public so AuthorityResponseMapper can use it
-     */
     public TaxonNamesInfo mapNames(List<GenieSpeciesName> names) {
         if (names == null) {
             return TaxonNamesInfo.builder()
@@ -236,17 +229,27 @@ public class TaxonResponseMapper {
             .build();
     }
 
+    /**
+     * UPDATED: Map protections with authority details
+     */
     private List<AuthorityProtectionInfo> mapProtections(List<GenieSpeciesProtection> protections) {
         if (protections == null) return new ArrayList<>();
 
         return protections.stream()
             .filter(p -> p.getAuthority() != null && p.getDerivation() != null)
-            .map(p -> AuthorityProtectionInfo.builder()
-                .authorityCode(p.getAuthority().getAuthorityCode())
-                .protectionType(getProtectionType(p.getProtectionId()))
-                .isDerived("Y".equals(p.getDerivation().getDerivationIndicator()))
-                .notes(p.getNoteString())
-                .build())
+            .map(p -> {
+                UpovAuthority auth = p.getAuthority();
+                return AuthorityProtectionInfo.builder()
+                    .authorityCode(auth.getAuthorityCode())
+                    .protectionType(getProtectionType(p.getProtectionId()))
+                    .isDerived("Y".equals(p.getDerivation().getDerivationIndicator()))
+                    .notes(p.getNoteString() != null ? p.getNoteString() : "")
+                    // NEW: Add authority details
+                    .authorityName(auth.getAuthorityName())
+                    .administrativeWebsite(auth.getAdministrativeWebAddress())
+                    .lawWebsite(auth.getLawWebAddress())
+                    .build();
+            })
             .collect(Collectors.toList());
     }
 
@@ -264,44 +267,80 @@ public class TaxonResponseMapper {
             .build();
     }
 
+    /**
+     * UPDATED: Map experiences with authority details
+     */
     private List<PracticalExperienceInfo> mapExperiences(List<SpeciesExperience> experiences) {
         if (experiences == null) return new ArrayList<>();
 
         return experiences.stream()
             .filter(e -> e.getAuthority() != null && e.getDerivation() != null)
-            .map(e -> PracticalExperienceInfo.builder()
-                .authorityCode(e.getAuthority().getAuthorityCode())
-                .isDerived("Y".equals(e.getDerivation().getDerivationIndicator()))
-                .noteSequence(e.getNoteString())
-                .build())
+            .map(e -> {
+                UpovAuthority auth = e.getAuthority();
+                return PracticalExperienceInfo.builder()
+                    .authorityCode(auth.getAuthorityCode())
+                    .isDerived("Y".equals(e.getDerivation().getDerivationIndicator()))
+                    .noteSequence(e.getNoteString() != null ? e.getNoteString() : "")
+                    // NEW: Add authority details
+                    .authorityName(auth.getAuthorityName())
+                    .administrativeWebsite(auth.getAdministrativeWebAddress())
+                    .lawWebsite(auth.getLawWebAddress())
+                    .build();
+            })
             .collect(Collectors.toList());
     }
 
+    /**
+     * UPDATED: Map offerings with authority details
+     */
     private List<CooperationOfferingInfo> mapOfferings(List<SpeciesOffering> offerings) {
         if (offerings == null) return new ArrayList<>();
 
         return offerings.stream()
             .filter(o -> o.getAuthority() != null)
-            .map(o -> CooperationOfferingInfo.builder()
-                .authorityCode(o.getAuthority().getAuthorityCode())
-                .offeringString(o.getOfferingString())
-                .isEoDesignation("Y".equals(o.getEoDesignation()))
-                .isDerived(o.getDerivation() != null && "Y".equals(o.getDerivation().getDerivationIndicator()))
-                .build())
+            .map(o -> {
+                UpovAuthority auth = o.getAuthority();
+                return CooperationOfferingInfo.builder()
+                    .authorityCode(auth.getAuthorityCode())
+                    .offeringString(o.getOfferingString())
+                    .isEoDesignation("Y".equals(o.getEoDesignation()))
+                    .isDerived(o.getDerivation() != null && "Y".equals(o.getDerivation().getDerivationIndicator()))
+                    // NEW: Add authority details
+                    .authorityName(auth.getAuthorityName())
+                    .administrativeWebsite(auth.getAdministrativeWebAddress())
+                    .lawWebsite(auth.getLawWebAddress())
+                    .build();
+            })
             .collect(Collectors.toList());
     }
 
+    /**
+     * UPDATED: Map utilizations with authority details for BOTH authorities
+     */
     private List<ReportUtilizationInfo> mapUtilizations(List<SpeciesUtilization> utilizations) {
         if (utilizations == null) return new ArrayList<>();
 
         return utilizations.stream()
             .filter(u -> u.getUtilizingAuthority() != null && u.getProvidingAuthority() != null)
-            .map(u -> ReportUtilizationInfo.builder()
-                .utilizingAuthority(u.getUtilizingAuthority().getAuthorityCode())
-                .providingAuthority(u.getProvidingAuthority().getAuthorityCode())
-                .isDerived(u.getDerivation() != null && "Y".equals(u.getDerivation().getDerivationIndicator()))
-                .noteSequence(u.getNoteString())
-                .build())
+            .map(u -> {
+                UpovAuthority utilizingAuth = u.getUtilizingAuthority();
+                UpovAuthority providingAuth = u.getProvidingAuthority();
+                
+                return ReportUtilizationInfo.builder()
+                    .utilizingAuthority(utilizingAuth.getAuthorityCode())
+                    .providingAuthority(providingAuth.getAuthorityCode())
+                    .isDerived(u.getDerivation() != null && "Y".equals(u.getDerivation().getDerivationIndicator()))
+                    .noteSequence(u.getNoteString() != null ? u.getNoteString() : "")
+                    // NEW: Add utilizing authority details
+                    .utilizingAuthorityName(utilizingAuth.getAuthorityName())
+                    .utilizingAdministrativeWebsite(utilizingAuth.getAdministrativeWebAddress())
+                    .utilizingLawWebsite(utilizingAuth.getLawWebAddress())
+                    // NEW: Add providing authority details
+                    .providingAuthorityName(providingAuth.getAuthorityName())
+                    .providingAdministrativeWebsite(providingAuth.getAdministrativeWebAddress())
+                    .providingLawWebsite(providingAuth.getLawWebAddress())
+                    .build();
+            })
             .collect(Collectors.toList());
     }
 
