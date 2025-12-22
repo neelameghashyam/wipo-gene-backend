@@ -1,0 +1,299 @@
+openapi: 3.0.3
+info:
+  title: GENIE API
+  description: REST APIs for Authorities, Species (Taxa), and Filters
+  version: 1.0.0
+
+servers:
+  - url: /api/v1
+    description: Local server
+
+tags:
+  - name: Authority
+    description: Authority related APIs
+  - name: Species
+    description: Species / Taxon related APIs
+  - name: Filters
+    description: Filter metadata APIs
+
+paths:
+
+  /authority/search:
+    get:
+      tags:
+        - Authority
+      summary: Search authorities by name or code
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Authority name or authority code
+      responses:
+        "200":
+          description: List of matching authorities
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AuthorityDTO"
+
+  /authority/{authorityId}:
+    get:
+      tags:
+        - Authority
+      summary: Get authority details by ID
+      parameters:
+        - name: authorityId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: Authority details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthorityDTO"
+
+  /authority/{authorityId}/protection:
+    get:
+      tags:
+        - Authority
+      summary: Get authority protection information
+      parameters:
+        - name: authorityId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: Protection information
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthorityProtectionResponse"
+
+  /authority/{authorityId}/dus:
+    get:
+      tags:
+        - Authority
+      summary: Get authority DUS guidance
+      parameters:
+        - name: authorityId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: DUS guidance details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthorityDUSResponse"
+
+  /filters:
+    get:
+      tags:
+        - Filters
+      summary: Get all filter options
+      responses:
+        "200":
+          description: Filter options for search
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FilterOptionsResponse"
+
+  /species:
+    get:
+      tags:
+        - Species
+      summary: Get all species (paginated)
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        "200":
+          description: Paginated species list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TaxonSearchEnhancedResponse"
+
+  /species/search:
+    get:
+      tags:
+        - Species
+      summary: Search species
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        "200":
+          description: Matching species list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TaxonListItemEnhanced"
+
+  /species/{id}:
+    get:
+      tags:
+        - Species
+      summary: Get species details
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: lang
+          in: query
+          schema:
+            type: string
+            default: en
+      responses:
+        "200":
+          description: Species details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TaxonDetailsResponse"
+
+  /species/{id}/names:
+    get:
+      tags:
+        - Species
+      summary: Get species names
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: Species names
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TaxonNamesInfo"
+
+  /species/{id}/protection:
+    get:
+      tags:
+        - Species
+      summary: Get species protection authorities
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: Protection authorities
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AuthorityProtectionInfo"
+
+  /species/{id}/dus-guidance:
+    get:
+      tags:
+        - Species
+      summary: Get species DUS guidance
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: DUS cooperation info
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DUSCooperationInfo"
+
+components:
+  schemas:
+
+    AuthorityDTO:
+      type: object
+      description: Authority basic information
+
+    AuthorityProtectionResponse:
+      type: object
+      description: Authority protection response
+
+    AuthorityDUSResponse:
+      type: object
+      description: Authority DUS response
+
+    FilterOptionsResponse:
+      type: object
+      description: Available filter options
+
+    TaxonDetailsResponse:
+      type: object
+      description: Full species details
+
+    TaxonSearchEnhancedResponse:
+      type: object
+      description: Paginated species search response
+
+    TaxonListItemEnhanced:
+      type: object
+      description: Species list item
+
+    TaxonNamesInfo:
+      type: object
+      description: Species names info
+
+    AuthorityProtectionInfo:
+      type: object
+      description: Authority protection details
+
+    DUSCooperationInfo:
+      type: object
+      description: DUS cooperation information
