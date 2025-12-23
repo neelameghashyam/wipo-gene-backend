@@ -229,9 +229,6 @@ public class TaxonResponseMapper {
             .build();
     }
 
-    /**
-     * UPDATED: Map protections with authority details
-     */
     private List<AuthorityProtectionInfo> mapProtections(List<GenieSpeciesProtection> protections) {
         if (protections == null) return new ArrayList<>();
 
@@ -240,11 +237,11 @@ public class TaxonResponseMapper {
             .map(p -> {
                 UpovAuthority auth = p.getAuthority();
                 return AuthorityProtectionInfo.builder()
+                    .authorityId(auth.getAuthorityId()) 
                     .authorityCode(auth.getAuthorityCode())
                     .protectionType(getProtectionType(p.getProtectionId()))
                     .isDerived("Y".equals(p.getDerivation().getDerivationIndicator()))
                     .notes(p.getNoteString() != null ? p.getNoteString() : "")
-                    // NEW: Add authority details
                     .authorityName(auth.getAuthorityName())
                     .administrativeWebsite(auth.getAdministrativeWebAddress())
                     .lawWebsite(auth.getLawWebAddress())
@@ -267,9 +264,6 @@ public class TaxonResponseMapper {
             .build();
     }
 
-    /**
-     * UPDATED: Map experiences with authority details
-     */
     private List<PracticalExperienceInfo> mapExperiences(List<SpeciesExperience> experiences) {
         if (experiences == null) return new ArrayList<>();
 
@@ -278,10 +272,10 @@ public class TaxonResponseMapper {
             .map(e -> {
                 UpovAuthority auth = e.getAuthority();
                 return PracticalExperienceInfo.builder()
+                    .authorityId(auth.getAuthorityId())  
                     .authorityCode(auth.getAuthorityCode())
                     .isDerived("Y".equals(e.getDerivation().getDerivationIndicator()))
                     .noteSequence(e.getNoteString() != null ? e.getNoteString() : "")
-                    // NEW: Add authority details
                     .authorityName(auth.getAuthorityName())
                     .administrativeWebsite(auth.getAdministrativeWebAddress())
                     .lawWebsite(auth.getLawWebAddress())
@@ -290,10 +284,8 @@ public class TaxonResponseMapper {
             .collect(Collectors.toList());
     }
 
-    /**
-     * UPDATED: Map offerings with authority details
-     */
-    private List<CooperationOfferingInfo> mapOfferings(List<SpeciesOffering> offerings) {
+    
+      private List<CooperationOfferingInfo> mapOfferings(List<SpeciesOffering> offerings) {
         if (offerings == null) return new ArrayList<>();
 
         return offerings.stream()
@@ -301,11 +293,11 @@ public class TaxonResponseMapper {
             .map(o -> {
                 UpovAuthority auth = o.getAuthority();
                 return CooperationOfferingInfo.builder()
+                    .authorityId(auth.getAuthorityId())  
                     .authorityCode(auth.getAuthorityCode())
                     .offeringString(o.getOfferingString())
                     .isEoDesignation("Y".equals(o.getEoDesignation()))
                     .isDerived(o.getDerivation() != null && "Y".equals(o.getDerivation().getDerivationIndicator()))
-                    // NEW: Add authority details
                     .authorityName(auth.getAuthorityName())
                     .administrativeWebsite(auth.getAdministrativeWebAddress())
                     .lawWebsite(auth.getLawWebAddress())
@@ -313,10 +305,7 @@ public class TaxonResponseMapper {
             })
             .collect(Collectors.toList());
     }
-
-    /**
-     * UPDATED: Map utilizations with authority details for BOTH authorities
-     */
+    
     private List<ReportUtilizationInfo> mapUtilizations(List<SpeciesUtilization> utilizations) {
         if (utilizations == null) return new ArrayList<>();
 
@@ -327,15 +316,15 @@ public class TaxonResponseMapper {
                 UpovAuthority providingAuth = u.getProvidingAuthority();
                 
                 return ReportUtilizationInfo.builder()
+                    .utilizingAuthorityId(utilizingAuth.getAuthorityId())  
+                    .providingAuthorityId(providingAuth.getAuthorityId())  
                     .utilizingAuthority(utilizingAuth.getAuthorityCode())
                     .providingAuthority(providingAuth.getAuthorityCode())
                     .isDerived(u.getDerivation() != null && "Y".equals(u.getDerivation().getDerivationIndicator()))
                     .noteSequence(u.getNoteString() != null ? u.getNoteString() : "")
-                    // NEW: Add utilizing authority details
                     .utilizingAuthorityName(utilizingAuth.getAuthorityName())
                     .utilizingAdministrativeWebsite(utilizingAuth.getAdministrativeWebAddress())
                     .utilizingLawWebsite(utilizingAuth.getLawWebAddress())
-                    // NEW: Add providing authority details
                     .providingAuthorityName(providingAuth.getAuthorityName())
                     .providingAdministrativeWebsite(providingAuth.getAdministrativeWebAddress())
                     .providingLawWebsite(providingAuth.getLawWebAddress())
@@ -343,7 +332,6 @@ public class TaxonResponseMapper {
             })
             .collect(Collectors.toList());
     }
-
     public ProtectionReportResponse toProtectionReportResponse(
             GenieSpecies genie,
             List<GenieSpeciesName> names,

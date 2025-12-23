@@ -6,6 +6,9 @@ import lombok.Builder;
 @Data
 @Builder
 public class ReportUtilizationInfo {
+    private Long utilizingAuthorityId;
+    private Long providingAuthorityId;
+    
     private String utilizingAuthority;
     private String providingAuthority;
     private boolean isDerived;

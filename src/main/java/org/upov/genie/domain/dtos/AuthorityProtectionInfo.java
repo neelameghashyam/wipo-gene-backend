@@ -6,6 +6,7 @@ import lombok.Builder;
 @Data
 @Builder
 public class AuthorityProtectionInfo {
+    private Long authorityId;
     private String authorityCode;
     private String protectionType;
     private boolean isDerived;

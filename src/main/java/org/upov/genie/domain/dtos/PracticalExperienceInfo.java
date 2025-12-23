@@ -6,6 +6,7 @@ import lombok.Builder;
 @Data
 @Builder
 public class PracticalExperienceInfo {
+    private Long authorityId;
     private String authorityCode;
     private boolean isDerived;
     private String noteSequence;
